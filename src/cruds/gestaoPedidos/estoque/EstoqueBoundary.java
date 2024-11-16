@@ -9,6 +9,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -25,12 +27,19 @@ public class EstoqueBoundary extends Application {
   private TextField txtForn = new TextField();
   private TextField txtFuncionarioReg = new TextField();
 
-  private EstoqueControl control = new EstoqueControl();
+  private EstoqueControl control;
 
   private TableView<Estoque> tableView = new TableView<>();
 
   @Override
   public void start(Stage stage) {
+
+    try {
+      control = new EstoqueControl();
+    } catch (EstoqueException er) {
+      alert(AlertType.ERROR, "Erro ao incializar sistema");
+    }
+
     // Panes
     BorderPane panePrincipal = new BorderPane();
     GridPane paneForm = new GridPane();
@@ -51,14 +60,24 @@ public class EstoqueBoundary extends Application {
     Button btnGravar = new Button("Gravar");
     btnGravar.setOnAction(
         e -> {
-          control.gravar();
-          tableView.refresh();
+          try {
+            control.gravar();
+            tableView.refresh();
+          } catch (EstoqueException er) {
+            alert(AlertType.ERROR, "Erro ao gravar");
+          }
         });
 
     paneForm.add(btnGravar, 0, 5);
 
     Button btnPesquisar = new Button("Pesquisar");
-    btnPesquisar.setOnAction(e -> control.pesquisarPorMedicamento());
+    btnPesquisar.setOnAction(e -> {
+      try {
+        control.pesquisarPorMedicamento();
+      } catch (EstoqueException er) {
+        alert(AlertType.ERROR, "Errro ao pesquisar");
+      }
+    });
 
     paneForm.add(btnPesquisar, 1, 5);
 
@@ -72,11 +91,22 @@ public class EstoqueBoundary extends Application {
     panePrincipal.setTop(paneForm);
     panePrincipal.setCenter(tableView);
 
-
     Scene scn = new Scene(panePrincipal, 600, 400);
     stage.setScene(scn);
     stage.setTitle("Cadastro de Medicamentos no Estoque");
     stage.show();
+    try {
+      control.pesquisarTodos();
+    } catch (EstoqueException er) {
+      alert(AlertType.ERROR, "Erro ao pesquisar todos");
+    }
+  }
+
+  public void alert(AlertType tipo, String msg) {
+    Alert alertWindow = new Alert(tipo);
+    alertWindow.setHeaderText("Alerta");
+    alertWindow.setContentText(msg);
+    alertWindow.showAndWait();
   }
 
   public void generateColumns() {
@@ -106,8 +136,12 @@ public class EstoqueBoundary extends Application {
           {
             btnExcluir.setOnAction(
                 e -> {
-                  Estoque es = tableView.getItems().get(getIndex());
-                  control.excluir(es);
+                  try {
+                    Estoque es = tableView.getItems().get(getIndex());
+                    control.excluir(es);
+                  } catch (EstoqueException er) {
+                    alert(AlertType.ERROR, "Erro ao excluir");
+                  }
                 });
           }
 

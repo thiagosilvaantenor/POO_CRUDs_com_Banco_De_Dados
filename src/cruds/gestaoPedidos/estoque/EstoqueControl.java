@@ -10,46 +10,54 @@ import javafx.collections.ObservableList;
 public class EstoqueControl {
 
   private ObservableList<Estoque> lista = FXCollections.observableArrayList();
-  private IntegerProperty id = new SimpleIntegerProperty();
-  private StringProperty medicamento = new SimpleStringProperty();
-  private IntegerProperty quantidade = new SimpleIntegerProperty();
-  private StringProperty fornecedor = new SimpleStringProperty();
-  private IntegerProperty funcionarioRegistro = new SimpleIntegerProperty();
+  private IntegerProperty id = new SimpleIntegerProperty(0);
+  private StringProperty medicamento = new SimpleStringProperty("");
+  private IntegerProperty quantidade = new SimpleIntegerProperty(0);
+  private StringProperty fornecedor = new SimpleStringProperty("");
+  private IntegerProperty funcionarioRegistro = new SimpleIntegerProperty(0);
 
   private int contador = 0;
 
-  public void entidadeParaTela(Estoque e) {
-    this.id.set(e.getId());
-    this.medicamento.set(e.getMedicamento());
-    this.quantidade.set(e.getQuantidade());
-    this.fornecedor.set(e.getFornecedor());
-    this.funcionarioRegistro.set(e.getFuncionarioRegistro());
+  private EstoqueDAO estoqueDAO;
+
+  public EstoqueControl() throws EstoqueException{
+    estoqueDAO = new EstoqueDAOImpl();
   }
 
-  public void gravar() {
+  public void entidadeParaTela(Estoque e) {
+    if (e != null) {
+      this.id.set(e.getId());
+      this.medicamento.set(e.getMedicamento());
+      this.quantidade.set(e.getQuantidade());
+      this.fornecedor.set(e.getFornecedor());
+      this.funcionarioRegistro.set(e.getFuncionarioRegistro());
+    }
+  }
+
+  public void gravar() throws EstoqueException {
+    // coloca os valores dos campos da tela na entidade
+    Estoque e = new Estoque();
+    e.setMedicamento(this.medicamento.get());
+    e.setQuantidade(this.quantidade.get());
+    e.setFornecedor(this.fornecedor.get());
+    e.setFuncionarioRegistro(this.funcionarioRegistro.get());
+
     // se o id da tela for = 0, então é novo registro
     if (id.get() == 0) {
-      Estoque e = new Estoque();
       contador += 1;
-      // coloca os valores dos campos da tela na entidade
       e.setId(contador);
-      e.setMedicamento(this.medicamento.get());
-      e.setQuantidade(this.quantidade.get());
-      e.setFornecedor(this.fornecedor.get());
-      e.setFuncionarioRegistro(this.funcionarioRegistro.get());
-      lista.add(e);
+      // insere no banco com os valores da entidade
+      estoqueDAO.inserir(e);
+
     } else {
       // Caso contrario foi selecionado um item já existente para ser atualizado
-      for (Estoque e : lista) {
-        if (e.getId() == this.id.get()) {
-          e.setMedicamento(this.medicamento.get());
-          e.setQuantidade(this.quantidade.get());
-          e.setFornecedor(this.fornecedor.get());
-          e.setFuncionarioRegistro(this.funcionarioRegistro.get());
-        }
-      }
+      e.setId(id.get());
+      estoqueDAO.atualizar(e);
     }
+    pesquisarTodos();
+    limparTudo();
     System.out.println("Tamanho da Lista: " + lista.size());
+
   }
 
   public void limparTudo() {
@@ -60,21 +68,20 @@ public class EstoqueControl {
     funcionarioRegistro.set(0);
   }
 
-  public void excluir(Estoque e) {
+  public void excluir(Estoque e) throws EstoqueException {
     System.err.println("Excluindo pedido de medicamento com id: " + e.getId());
-    lista.remove(e);
+    estoqueDAO.remover(e);
+    pesquisarTodos();
   }
 
-  public void pesquisarPorMedicamento() {
-    for (Estoque e : lista) {
-      if (e.getMedicamento().contains(medicamento.get())) {
-        id.set(e.getId());
-        medicamento.set(e.getMedicamento());
-        quantidade.set(e.getQuantidade());
-        fornecedor.set(e.getFornecedor());
-        funcionarioRegistro.set(e.getFuncionarioRegistro());
-      }
-    }
+  public void pesquisarPorMedicamento() throws EstoqueException {
+    lista.clear();
+    lista.addAll(estoqueDAO.pesquisarPorMedicamento(medicamento.get()));
+  }
+
+  public void pesquisarTodos() throws EstoqueException {
+    lista.clear();
+    lista.addAll(estoqueDAO.pesquisarPorMedicamento(medicamento.get()));
   }
 
   public ObservableList<Estoque> getLista() {
