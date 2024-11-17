@@ -4,9 +4,9 @@
 # Status
 🚧Em construção🚧
 - 🆕 Ultima atualização 🆕
+  - CRUD de receita conectado com o banco de dados e testado com database temporaria
   - CRUD de estoque foi conectado com o banco de dados, porém a database criada é temporaria e não está completa
 - 🚧 Proximas melhorias 🚧
-  - Conectar o CRUD de receitas com o Banco de dados
   - Terminar database
  
 # Tecnologias
