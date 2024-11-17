@@ -81,7 +81,7 @@ public class EstoqueControl {
 
   public void pesquisarTodos() throws EstoqueException {
     lista.clear();
-    lista.addAll(estoqueDAO.pesquisarPorMedicamento(medicamento.get()));
+    lista.addAll(estoqueDAO.pesquisarTodos());
   }
 
   public ObservableList<Estoque> getLista() {

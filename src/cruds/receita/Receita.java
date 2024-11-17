@@ -1,24 +1,20 @@
 package cruds.receita;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import cruds.gestaoPedidos.estoque.Estoque;
 
 public class Receita {
   private int id;
   private LocalDate dataReceita;
-  private int pacienteId;
+  // receita vai ter uma lista de medicamentos
+  private String medicamentos;
   private String medicoCRM;
-  //receita vai ter uma lista de medicamentos
 
   public int getId() {
     return id;
-  }
-
-  public int getPacienteId() {
-    return pacienteId;
-  }
-
-  public void setPacienteId(int pacienteId) {
-    this.pacienteId = pacienteId;
   }
 
   public void setId(int id) {
@@ -31,6 +27,14 @@ public class Receita {
 
   public void setDataReceita(LocalDate dataReceita) {
     this.dataReceita = dataReceita;
+  }
+
+  public String getMedicamentos() {
+    return medicamentos;
+  }
+
+  public void setMedicamentos(String medicamentos) {
+    this.medicamentos = medicamentos;
   }
 
   public String getMedicoCRM() {

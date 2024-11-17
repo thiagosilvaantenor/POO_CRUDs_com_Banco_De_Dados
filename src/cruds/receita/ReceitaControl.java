@@ -1,6 +1,8 @@
 package cruds.receita;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -15,17 +17,25 @@ public class ReceitaControl {
 
   private ObservableList<Receita> lista = FXCollections.observableArrayList();
   private IntegerProperty id = new SimpleIntegerProperty(0);
-  private IntegerProperty pacienteId = new SimpleIntegerProperty(0);
   private ObjectProperty<LocalDate> dataReceita = new SimpleObjectProperty<>(LocalDate.now());
   private StringProperty medicoCRM = new SimpleStringProperty("");
+  private StringProperty medicamentos = new SimpleStringProperty("");
 
   private int contador = 0;
 
+  private ReceitaDAO receitaDAO;
+
+  public ReceitaControl() throws ReceitaException {
+    receitaDAO = new ReceitaDAOImpl();
+  }
+
   public void entidadeParaTela(Receita r) {
-    this.id.set(r.getId());
-    this.pacienteId.set(r.getPacienteId());
-    this.dataReceita.set(r.getDataReceita());
-    this.medicoCRM.set(r.getMedicoCRM());
+    if (r != null) {
+      this.id.set(r.getId());
+      this.dataReceita.set(r.getDataReceita());
+      this.medicamentos.set(r.getMedicamentos());
+      this.medicoCRM.set(r.getMedicoCRM());
+    }
   }
 
   public void excluir(Receita r) {
@@ -33,44 +43,52 @@ public class ReceitaControl {
     lista.remove(r);
   }
 
-  public void gravar() {
+  public void gravar() throws ReceitaException {
+    Receita r = new Receita();
+    r.setDataReceita(this.dataReceita.get());
+    r.setMedicoCRM(this.medicoCRM.get());
+    r.setMedicamentos(this.medicamentos.get());
     // id = 0 sempre que for um novo registro
     if (id.get() == 0) {
-      Receita r = new Receita();
-      contador += 1;
       // muda o valor do id para estar de acordo com o contador
+      contador += 1;
       r.setId(contador);
-      r.setPacienteId(this.pacienteId.get());
-      r.setDataReceita(this.dataReceita.get());
-      r.setMedicoCRM(this.medicoCRM.get());
-      lista.add(r);
+      receitaDAO.inserir(r);
     } else {
-      for (Receita m : lista) {
-        if (m.getId() == this.id.get()) {
-          m.setPacienteId(this.pacienteId.get());
-          m.setDataReceita(this.dataReceita.get());
-          m.setMedicoCRM(this.medicoCRM.get());
-        }
-      }
+      // Devido a assoativa ter como chave o id de estoque, não é possivel atualizar
+      // os medicamentos, informar o usuário desta regra
+      r.setId(id.get());
+      receitaDAO.atualizar(r);
     }
+    pesquisarTodos();
+    limparTudo();
     System.out.println("Lista tamanho: " + lista.size());
   }
 
   public void limparTudo() {
     id.set(0);
-    pacienteId.set(0);
     dataReceita.set(LocalDate.now());
+    medicamentos.set("");
     medicoCRM.set("");
   }
 
-  public void pesquisarPorData() {
-    for (Receita m : lista) {
-      if (m.getDataReceita().equals(dataReceita.get())) {
-        pacienteId.set(m.getPacienteId());
-        dataReceita.set(m.getDataReceita());
-        medicoCRM.set(m.getMedicoCRM());
-      }
+  public void pesquisarPorCrm() throws ReceitaException {
+    lista.clear();
+    lista.addAll(receitaDAO.pesquisarPorCRM(medicoCRM.get()));
+  }
+
+  public void pesquisarTodos() throws ReceitaException {
+    lista.clear();
+    lista.addAll(receitaDAO.pesquisarTodos());
+  }
+
+  public boolean verificaMedicamentos() throws ReceitaException {
+    String[] arrayMed = this.medicamentos.getValue().split(",");
+    List<String> meds = new ArrayList<>();
+    for (String item : arrayMed) {
+      meds.add(item);
     }
+    return receitaDAO.pesquisarMedicamento(meds);
   }
 
   public ObservableList<Receita> getLista() {
@@ -78,18 +96,19 @@ public class ReceitaControl {
   }
 
   public IntegerProperty idProperty() {
-    return this.id;
-  }
-
-  public IntegerProperty pacienteIdProperty() {
-    return pacienteId;
+    return id;
   }
 
   public ObjectProperty<LocalDate> dataReceitaProperty() {
     return dataReceita;
   }
 
+  public StringProperty medicamentosProperty() {
+    return medicamentos;
+  }
+
   public StringProperty medicoCRMProperty() {
     return medicoCRM;
   }
+
 }

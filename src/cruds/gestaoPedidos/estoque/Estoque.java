@@ -47,4 +47,9 @@ public class Estoque {
     this.medicamento = medicamento;
   }
 
+  @Override
+  public String toString() {
+    return this.medicamento;
+  }
+
 }
