@@ -60,7 +60,7 @@ public class ReceitaDAOImpl implements ReceitaDAO {
       for (String m : medicamentos) {
         String SQL = """
                 SELECT medicamento FROM estoque
-                WHERE medicamento=?
+                WHERE medicamento LIKE ?
             """;
         PreparedStatement stm = con.prepareStatement(SQL);
         stm.setString(1, "%" + m + "%");
