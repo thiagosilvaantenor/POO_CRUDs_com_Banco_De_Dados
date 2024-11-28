@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cruds.receita.ReceitaControl;
+
 public class EstoqueDAOImpl implements EstoqueDAO {
 
   private static final String DB_CLASS = "org.mariadb.jdbc.Driver";
@@ -71,8 +73,74 @@ public class EstoqueDAOImpl implements EstoqueDAO {
   @Override
   public void remover(Estoque e) throws EstoqueException {
     try {
+      // verifica se medicamento esta em uma receita
+      removeReceitaComMed(e);
       String SQL = """
               DELETE FROM estoque WHERE id=?
+          """;
+      PreparedStatement stm = con.prepareStatement(SQL);
+      stm.setInt(1, e.getId());
+      int i = stm.executeUpdate();
+    } catch (SQLException er) {
+      er.printStackTrace();
+      throw new EstoqueException(er);
+    }
+  }
+
+  private void removeReceitaComMed(Estoque e) throws EstoqueException {
+
+    try {
+      List<Integer> ids = buscaIdReceita(e);
+      // busca e verifica se o medicamento aparece em alguma receita
+      if (!ids.isEmpty()) {
+        // se sim, remove a associativa receita e estoque
+        removerDaAssociativa(e);
+        // e remove a receita
+        for (Integer id : ids) {
+          // pra cada id de receita da lista de ids, executa o delete
+          String SQL = """
+              DELETE FROM receita
+              WHERE id=?
+              """;
+          PreparedStatement stm = con.prepareStatement(SQL);
+          stm.setInt(1, id);
+          int i = stm.executeUpdate();
+        }
+      }
+    } catch (SQLException er) {
+      er.printStackTrace();
+      throw new EstoqueException(er);
+    }
+  }
+
+  private List<Integer> buscaIdReceita(Estoque e) throws EstoqueException {
+    List<Integer> lista = new ArrayList<>();
+    try {
+      String SQL = """
+            SELECT receitaId FROM receitaEstoque
+            WHERE estoqueId=?
+          """;
+      PreparedStatement stm = con.prepareStatement(SQL);
+      stm.setInt(1, e.getId());
+      // Lista com o resultado da query
+      ResultSet rs = stm.executeQuery();
+      // Enquanto existir elementos na lista continua o while
+      while (rs.next()) {
+        Integer i = rs.getInt("receitaId");
+        lista.add(i);
+      }
+    } catch (SQLException er) {
+      er.printStackTrace();
+      throw new EstoqueException(er);
+    }
+    return lista;
+  }
+
+  private void removerDaAssociativa(Estoque e) throws EstoqueException {
+
+    try {
+      String SQL = """
+              DELETE FROM receitaEstoque WHERE estoqueId=?
           """;
       PreparedStatement stm = con.prepareStatement(SQL);
       stm.setInt(1, e.getId());

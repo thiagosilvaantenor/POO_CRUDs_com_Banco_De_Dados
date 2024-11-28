@@ -47,7 +47,18 @@ public class ReceitaControl {
     Receita r = new Receita();
     r.setDataReceita(this.dataReceita.get());
     r.setMedicoCRM(this.medicoCRM.get());
-    r.setMedicamentos(this.medicamentos.get());
+    // Separa os medicamentos por ,
+    String[] medicamentos = this.medicamentos.get().split(",");
+    StringBuilder stb = new StringBuilder();
+    for (int i = 0; i < medicamentos.length; i++) {
+      if (i != medicamentos.length - 1) {
+        stb.append(medicamentos[i]);
+        stb.append(",");
+      } else {
+        stb.append(medicamentos[i]);
+      }
+    }
+    r.setMedicamentos(stb.toString());
     // id = 0 sempre que for um novo registro
     if (id.get() == 0) {
       // muda o valor do id para estar de acordo com o contador

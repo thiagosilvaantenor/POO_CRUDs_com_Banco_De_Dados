@@ -122,23 +122,27 @@ public class ReceitaDAOImpl implements ReceitaDAO {
 
   private List<Integer> buscaIdEstoque(String medicamentos) throws ReceitaException {
     String[] vetMed = medicamentos.split(",");
+    System.out.println(vetMed[0] + " " + vetMed[1]);
     List<String> listaMed = new ArrayList<>();
+
     for (String item : vetMed) {
-      listaMed.add(item);
+      listaMed.add(item.strip());
     }
+
+    System.out.println(listaMed.toString());
 
     List<Integer> medIds = new ArrayList<>();
     ResultSet rs;
     try {
       for (String m : listaMed) {
         String SQL = """
-            SELECT id FROM estoque WHERE medicamento =?
+            SELECT id FROM estoque WHERE medicamento LIKE ?
             """;
         PreparedStatement stm = con.prepareStatement(SQL);
-        stm.setString(1, m);
+        stm.setString(1, "%" + m + "%");
         rs = stm.executeQuery();
         // Aponta para a primeira linha
-        if (rs.next()) {
+        while(rs.next()) {
           medIds.add(rs.getInt("id"));
         }
       }
@@ -146,6 +150,7 @@ public class ReceitaDAOImpl implements ReceitaDAO {
       er.printStackTrace();
       throw new ReceitaException(er);
     }
+    System.out.println("Medicamentos id: " + medIds.toString());
     return medIds;
   }
 

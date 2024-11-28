@@ -1,10 +1,6 @@
 package cruds.receita;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-import cruds.gestaoPedidos.estoque.Estoque;
 
 public class Receita {
   private int id;

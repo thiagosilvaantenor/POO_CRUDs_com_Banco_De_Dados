@@ -29,5 +29,5 @@ CREATE TABLE receitaEstoque (
 INSERT INTO estoque (id, medicamento, quantidade, fornecedor, funcionarioRegistro)
 VALUES (0, 'Loratadina', 1, 'Gov', 1);
 
- INSERT INTO estoque (id, medicamento, quantidade, fornecedor, funcionarioRegistro)
- VALUES (0, 'Dipirona', 2, 'Generico', 2);
+INSERT INTO estoque (id, medicamento, quantidade, fornecedor, funcionarioRegistro)
+VALUES (0, 'Dipirona', 2, 'Generico', 2);
