@@ -1,51 +1,40 @@
 package cruds.receita;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-import cruds.gestaoPedidos.estoque.Estoque;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.util.StringConverter;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
 
 public class ReceitaBoundary extends Application {
   // Campos e Label
   private Label lbId = new Label("");
-  private TextField txtPacienteId = new TextField("");
   private DatePicker dateReceita = new DatePicker(LocalDate.now());
-  private TextField txtCRM = new TextField("");
+  private TextField txtCRM = new TextField();
   // Seleção de medicamentos
-  private TextField txtMedicamentos = new TextField("Digite os medicamentos separando eles por espaço");
+  private TextField txtMedicamentos = new TextField("");
 
   // Table
   private TableView<Receita> tableView = new TableView<>();
 
   // control
   private ReceitaControl control;
-
-  // Lista medicamentos
-  private List<String> listaMeds = new ArrayList<>();
 
   @Override
   public void start(Stage stage) {
@@ -65,19 +54,10 @@ public class ReceitaBoundary extends Application {
     paneForm.add(lbId, 1, 0);
     paneForm.add(new Label("Data da Receita: "), 0, 1);
     paneForm.add(dateReceita, 1, 1);
-    paneForm.add(new Label("Medicamentos: "), 0, 2);
+    paneForm.add(new Label("Medicamentos, SEPARAR POR virgula: "), 0, 2);
     paneForm.add(txtMedicamentos, 1, 2);
     paneForm.add(new Label("CRM do Médico: "), 0, 3);
     paneForm.add(txtCRM, 1, 3);
-
-    // // Listener para preencher a lista de medicamentos do campo de texto
-    // txtMedicamentos.textProperty().addListener((obs, antigo, novo) -> {
-    // String[] buffer = antigo.split(" ");
-    // alert(AlertType.INFORMATION, buffer[0]);
-    // for (int i = 0; i < buffer.length; i++) {
-    // listaMeds.add(buffer[i]);
-    // }
-    // });
 
     // Btns
     Button btnGravar = new Button("Gravar");
@@ -85,21 +65,17 @@ public class ReceitaBoundary extends Application {
         e -> {
           try {
             if (control.verificaMedicamentos()) {
-              // String[] medicamentos = txtMedicamentos.textProperty().getValue().split(",");
-              // for (int i = 0; i < medicamentos.length; i++) {
-              //   alert(AlertType.INFORMATION, medicamentos[i]);
-              //   listaMeds.add(medicamentos[i]);
-              // }
-              // vincularPropriedades();
               control.gravar();
               tableView.refresh();
+            } else{
+              alert(AlertType.ERROR, "Um ou mais medicamentos não foram encontrados");
             }
           } catch (ReceitaException err) {
             alert(AlertType.ERROR, "Erro ao gravar");
           }
         });
 
-    Button btnPesquisar = new Button("Pesquisar");
+    Button btnPesquisar = new Button("Pesquisar Por CRM");
     btnPesquisar.setOnAction(e -> {
       try {
         control.pesquisarPorCrm();
@@ -194,12 +170,11 @@ public class ReceitaBoundary extends Application {
 
   public void vincularPropriedades() {
     // Vincula label e campos com os atributos da controller
-    Bindings.bindBidirectional(lbId.textProperty(), control.idProperty(),
-        (StringConverter) new IntegerStringConverter());
+    Bindings.bindBidirectional(lbId.textProperty(), control.idProperty(), (StringConverter) new IntegerStringConverter());
     Bindings.bindBidirectional(dateReceita.valueProperty(), control.dataReceitaProperty());
     Bindings.bindBidirectional(txtMedicamentos.textProperty(),
         control.medicamentosProperty());
-    Bindings.bindBidirectional(txtCRM.textProperty(), control.medicoCRMProperty());
+    Bindings.bindBidirectional(txtCRM.textProperty(),control.medicoCRMProperty());
   }
 
   public static void main(String[] args) {

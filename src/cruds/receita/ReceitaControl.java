@@ -59,16 +59,18 @@ public class ReceitaControl {
       }
     }
     r.setMedicamentos(stb.toString());
+
     // id = 0 sempre que for um novo registro
     if (id.get() == 0) {
       // muda o valor do id para estar de acordo com o contador
       contador += 1;
       r.setId(contador);
+      System.out.println(r.getId());
       receitaDAO.inserir(r);
     } else {
       // Devido a assoativa ter como chave o id de estoque, não é possivel atualizar
       // os medicamentos, informar o usuário desta regra
-      r.setId(id.get());
+      r.setId(this.id.get());
       receitaDAO.atualizar(r);
     }
     pesquisarTodos();
@@ -97,7 +99,7 @@ public class ReceitaControl {
     String[] arrayMed = this.medicamentos.getValue().split(",");
     List<String> meds = new ArrayList<>();
     for (String item : arrayMed) {
-      meds.add(item);
+      meds.add(item.strip());
     }
     return receitaDAO.pesquisarMedicamento(meds);
   }

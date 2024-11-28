@@ -6,12 +6,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
-import cruds.gestaoPedidos.estoque.Estoque;
-import cruds.gestaoPedidos.estoque.EstoqueException;
 
 public class ReceitaDAOImpl implements ReceitaDAO {
 
@@ -33,24 +29,28 @@ public class ReceitaDAOImpl implements ReceitaDAO {
 
   public boolean pesquisarMedicamento(List<String> medicamentos) throws ReceitaException {
 
+    boolean achou = false;
     try {
       for (String m : medicamentos) {
         String SQL = """
                 SELECT estoque.medicamento FROM estoque
-                WHERE medicamento=?
+                WHERE medicamento LIKE ?
             """;
         PreparedStatement stm = con.prepareStatement(SQL);
         stm.setString(1, "%" + m + "%");
         ResultSet rs = stm.executeQuery();
-        // if (!rs.getString("medicamento").contains(m)) {
-        // return false;
-        // }
+        while (rs.next()) {
+          if (rs.getString("medicamento").contains(m)) {
+            achou = true;
+            break;
+          }
+        }
       }
     } catch (SQLException er) {
       er.printStackTrace();
       throw new ReceitaException(er);
     }
-    return true;
+    return achou;
   }
 
   public List<String> buscarListaMed(List<String> medicamentos) throws ReceitaException {
@@ -122,14 +122,11 @@ public class ReceitaDAOImpl implements ReceitaDAO {
 
   private List<Integer> buscaIdEstoque(String medicamentos) throws ReceitaException {
     String[] vetMed = medicamentos.split(",");
-    System.out.println(vetMed[0] + " " + vetMed[1]);
     List<String> listaMed = new ArrayList<>();
 
     for (String item : vetMed) {
       listaMed.add(item.strip());
     }
-
-    System.out.println(listaMed.toString());
 
     List<Integer> medIds = new ArrayList<>();
     ResultSet rs;
@@ -142,7 +139,7 @@ public class ReceitaDAOImpl implements ReceitaDAO {
         stm.setString(1, "%" + m + "%");
         rs = stm.executeQuery();
         // Aponta para a primeira linha
-        while(rs.next()) {
+        while (rs.next()) {
           medIds.add(rs.getInt("id"));
         }
       }
@@ -169,7 +166,6 @@ public class ReceitaDAOImpl implements ReceitaDAO {
       stm.setString(2, r.getMedicoCRM());
       stm.setInt(3, r.getId());
       int i = stm.executeUpdate();
-
     } catch (SQLException e) {
       e.printStackTrace();
       throw new ReceitaException(e);
