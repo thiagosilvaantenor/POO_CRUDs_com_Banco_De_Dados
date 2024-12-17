@@ -2,12 +2,9 @@
 `2 Cruds, cadastro de receitas e estoque de medicamentos, que fazem parte de um dominio hospitalar. Utilizado para aperfeiçoar os conhecimentos em POO, Java, JavaFX e SQL`
 
 # Status
-🚧Em construção🚧
-- 🆕 Ultima atualização 🆕
+- ✅Finalizado✅
   - CRUD de receita conectado com o banco de dados e testado com database temporaria
   - CRUD de estoque foi conectado com o banco de dados, porém a database criada é temporaria e não está completa
-- 🚧 Proximas melhorias 🚧
-  - Terminar database
  
 # Tecnologias
 - Java e JavaFx
